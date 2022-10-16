@@ -23,6 +23,7 @@ def random_solution(starting_node, data, distances):
     last_node = chosen_nodes[-1]
     cost += data[last_node]['cost']
     dist = distances[last_node, chosen_nodes[0]]
+    cost += dist
     return cost, chosen_nodes
 
 def random_solution_iterate(data):
