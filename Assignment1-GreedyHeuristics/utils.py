@@ -68,7 +68,7 @@ def calculate_cost(cycle, data: dict):
     return allcost
 
 
-def plot_cycle(points, data_dic):
+def plot_cycle(points, data_dic, save_name="tsp_result.png"):
     plt.rcParams["figure.figsize"] = (20,20)
     chosen_points_x = [data_dic[k]['x'] for k in points]
     chosen_points_x.append(chosen_points_x[0])
@@ -78,4 +78,4 @@ def plot_cycle(points, data_dic):
     costs.append(costs[0])
     plt.plot(chosen_points_x, chosen_points_y)
     plt.scatter(chosen_points_x, chosen_points_y, s=costs)
-    plt.show()
+    plt.savefig(save_name)
