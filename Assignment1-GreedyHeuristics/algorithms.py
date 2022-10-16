@@ -151,8 +151,4 @@ def cycle_greedy_iterate(data, include_costs=True):
         if cost > max_cost:
             max_cost = cost
     avg_cost = round(sum(all_costs)/len(all_costs))
-    print(min_cost)
-    print(max_cost)
-    print(avg_cost)
-    print(min_cost_nodes)
     return min_cost, max_cost, avg_cost, min_cost_nodes
