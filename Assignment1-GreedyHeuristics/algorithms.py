@@ -1,10 +1,8 @@
 from xml.etree.ElementInclude import include
 import numpy as np
-import pandas as pd
 import random
 import copy
-import matplotlib.pyplot as plt
-from utils import calculate_single_distance, calculate_min_costs, calculate_all_distances, calculate_cost, calculate_distances
+from utils import calculate_min_costs, calculate_all_distances
 
 
 def random_solution(starting_node, data, distances):
@@ -45,10 +43,6 @@ def random_solution_iterate(data):
         if total_cost > max_cost:
             max_cost = total_cost
     avg_cost = round(sum(all_costs)/len(all_costs))
-    print(min_cost)
-    print(max_cost)
-    print(avg_cost)
-    print(min_cost_nodes)
     return min_cost, max_cost, avg_cost, min_cost_nodes
 
 
@@ -98,42 +92,7 @@ def nearest_neighbor_iterate(data, include_costs=True):
         if total_cost > max_cost:
             max_cost = total_cost
     avg_cost = round(sum(all_costs)/len(all_costs))
-    print(min_cost)
-    print(max_cost)
-    print(avg_cost)
-    print(min_cost_nodes)
     return min_cost, max_cost, avg_cost, min_cost_nodes
-
-
-def cycle_greedy_old(first_node, nearest_node, data, all_distances):
-    """
-    Version that checks all points and all edges.
-    """
-    # cos nie dziala! zwraca 101 wyników zamiast 100, i koszty sie nie zgadzaja, ale wyglad obrazka ten sam
-    # TODO remove whole function in future release
-    total_cost = [all_distances[first_node, nearest_node] * 2]
-    total_cost_dist = total_cost.copy()
-    total_cost_cost = []
-    chosen_nodes = [first_node, nearest_node]
-    while len(data) > 101:
-        mini = np.inf
-        for n in range(len(chosen_nodes)-1):
-            i = chosen_nodes[n]
-            j = chosen_nodes[n+1]
-            for new_node in list(data.keys()):
-                i_next_dist = all_distances[i, new_node]
-                j_next_dist = all_distances[new_node, j]
-                insertion_dist = i_next_dist + j_next_dist - all_distances[i, j]
-                if insertion_dist < mini:
-                    mini = insertion_dist
-                    indx = new_node
-                    pos = n+1
-        chosen_nodes.insert(pos, indx)
-        total_cost.append(mini)
-        total_cost.append(data.pop(indx)['cost'])
-        total_cost_cost.append(total_cost[-1])
-        total_cost_dist.append(mini)
-    return sum(total_cost), chosen_nodes
 
 
 def cycle_greedy(first_node, nearest_node, data, all_distances_with_costs):
@@ -180,7 +139,7 @@ def cycle_greedy_iterate(data, include_costs=True):
     else:
         all_distances_with_costs = all_distances
     min_costs = calculate_min_costs(all_distances_with_costs)
-    for i in range(10):  # TODO should be len(data)
+    for i in range(len(data)):#range(10):  # TODO should be len(data)
         dat = copy.deepcopy(data)
         first_node = i
         nearest_node = min_costs[i][0]
