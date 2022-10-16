@@ -6,41 +6,86 @@ import matplotlib.pyplot as plt
 from utils import calculate_single_distance, calculate_min_costs, calculate_all_distances, calculate_cost, calculate_distances
 
 
-def random_solution(starting_node, data, total_cost, chosen_nodes):
-    """
-    Next node is chosen randomly.
-    """
-    chosen_nodes.append(starting_node)
-    while len(data) > 101:
-        start_node = data.pop(starting_node)
-        random_node = random.choice(list(data.keys()))
-        end_node = data[random_node]
-        dist = calculate_single_distance(start_node, end_node)
-        total_cost.append(start_node['cost'])
-        total_cost.append(dist)
-        random_solution(random_node, data, total_cost, chosen_nodes)
-    return sum(total_cost), chosen_nodes
+# def random_solution(starting_node, data, total_cost, chosen_nodes):
+#     """
+#     Next node is chosen randomly.
+#     """
+#     chosen_nodes.append(starting_node)
+#     while len(data) > 101:
+#         start_node = data.pop(starting_node)
+#         random_node = random.choice(list(data.keys()))
+#         end_node = data[random_node]
+#         dist = calculate_single_distance(start_node, end_node)
+#         total_cost.append(start_node['cost'])
+#         total_cost.append(dist)
+#         random_solution(random_node, data, total_cost, chosen_nodes)
+#     return sum(total_cost), chosen_nodes
 
+
+# def random_solution_iterate(data):
+#     """
+#     Start from each point and get min and max values and best set of nodes.
+#     """
+#     min_cost = np.inf
+#     max_cost = 0
+#     min_cost_nodes = []
+#     for i in range(len(data)):
+#         total_cost, chosen_nodes = random_solution(i, copy.deepcopy(data), total_cost = [], chosen_nodes = [])
+#         if total_cost < min_cost:
+#             min_cost = total_cost
+#             min_cost_nodes = chosen_nodes
+#         if total_cost > max_cost:
+#             max_cost = total_cost
+#     print(min_cost)
+#     print(max_cost)
+#     print(len(min_cost_nodes))
+#     print(min_cost_nodes)
+#     return min_cost_nodes
+
+
+def random_solution(starting_node, data, distances):
+    cost = 0
+    chosen_nodes = []
+    lst = list(range(200))
+    lst.pop(starting_node)
+    random.shuffle(lst)
+    chosen_nodes.append(starting_node)
+    i = 0
+    for n in lst[:99]:
+        start_node = chosen_nodes[i]
+        cost += data[start_node]['cost']
+        dist = distances[start_node, n]
+        cost += dist
+        chosen_nodes.append(n)
+        i += 1
+    last_node = chosen_nodes[-1]
+    cost += data[last_node]['cost']
+    dist = distances[last_node, chosen_nodes[0]]
+    return cost, chosen_nodes
 
 def random_solution_iterate(data):
     """
     Start from each point and get min and max values and best set of nodes.
     """
+    distances = calculate_all_distances(data)
     min_cost = np.inf
     max_cost = 0
     min_cost_nodes = []
+    all_costs = []
     for i in range(len(data)):
-        total_cost, chosen_nodes = random_solution(i, copy.deepcopy(data), total_cost = [], chosen_nodes = [])
+        total_cost, chosen_nodes = random_solution(i, data, distances)
+        all_costs.append(total_cost)
         if total_cost < min_cost:
             min_cost = total_cost
             min_cost_nodes = chosen_nodes
         if total_cost > max_cost:
             max_cost = total_cost
+    avg_cost = round(sum(all_costs)/len(all_costs))
     print(min_cost)
     print(max_cost)
-    print(len(min_cost_nodes))
+    print(avg_cost)
     print(min_cost_nodes)
-    return min_cost_nodes
+    return min_cost, max_cost, avg_cost, min_cost_nodes
 
 
 def nearest_neighbor(starting_node, data, all_costs: np.ndarray):
@@ -66,6 +111,7 @@ def nearest_neighbor_iterate(data, include_costs=True):
     min_cost = np.inf
     max_cost = 0
     min_cost_nodes = []
+    all_costs = []
     all_distances = calculate_all_distances(data)
     all_costs_arr = np.array([data[i]['cost'] for i in data])  # TODO add it
     if include_costs:
@@ -76,17 +122,20 @@ def nearest_neighbor_iterate(data, include_costs=True):
     # sorted_indices = all_distances_with_costs.argsort(axis=1)
     # sorted_indices = [i: list(sorted_indices[i]) for i in range(sorted_indices.shape[0])]
     for i in range(len(data)):
-        total_cost, chosen_nodes = nearest_neighbor(i, copy.deepcopy(data), copy.deepcopy(all_distances_with_costs)) 
+        total_cost, chosen_nodes = nearest_neighbor(i, data, copy.deepcopy(all_distances_with_costs)) 
         total_cost += all_distances[i, chosen_nodes[-1]]
+        all_costs.append(total_cost)
         if total_cost < min_cost:
             min_cost = total_cost
             min_cost_nodes = chosen_nodes
         if total_cost > max_cost:
             max_cost = total_cost
+    avg_cost = round(sum(all_costs)/len(all_costs))
     print(min_cost)
     print(max_cost)
+    print(avg_cost)
     print(min_cost_nodes)
-    return min_cost, max_cost, min_cost_nodes
+    return min_cost, max_cost, avg_cost, min_cost_nodes
 
 
 def cycle_greedy_old(first_node, nearest_node, data, all_distances):
@@ -156,6 +205,7 @@ def cycle_greedy_iterate(data, include_costs=True):
     min_cost = np.inf
     max_cost = 0
     min_cost_nodes = []
+    all_costs = []
     all_distances = calculate_all_distances(data)
     all_costs_arr = np.array([data[i]['cost'] for i in data])  # TODO add it
     if include_costs:
@@ -168,12 +218,15 @@ def cycle_greedy_iterate(data, include_costs=True):
         first_node = i
         nearest_node = min_costs[i][0]
         cost, cycle = cycle_greedy(first_node=first_node, nearest_node=nearest_node, data=dat, all_distances_with_costs=all_distances_with_costs)
+        all_costs.append(cost)
         if cost < min_cost:
             min_cost = cost
             min_cost_nodes = cycle
         if cost > max_cost:
             max_cost = cost
+    avg_cost = round(sum(all_costs)/len(all_costs))
     print(min_cost)
     print(max_cost)
+    print(avg_cost)
     print(min_cost_nodes)
-    return min_cost, max_cost, min_cost_nodes
+    return min_cost, max_cost, avg_cost, min_cost_nodes
