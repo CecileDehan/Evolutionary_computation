@@ -1,7 +1,5 @@
 import numpy as np
 import pandas as pd
-import random
-import copy
 import matplotlib.pyplot as plt
 
 

@@ -9,12 +9,26 @@ if __name__ == "__main__":
 
     # random solution
     # min_cost, max_cost, avg_cost, random_points = random_solution_iterate(tspa_dic)
+    # print(min_cost)
+    # print(max_cost)
+    # print(avg_cost)
+    # print(random_points)
     # plot_cycle(random_points, tspa_dic)
+    
 
     # nearest neighbor solution
-    # min_cost, max_cost, avg_cost, nearest_points = nearest_neighbor_iterate(tspa_dic)
+    # min_cost, max_cost, avg_cost, nearest_points = nearest_neighbor_iterate(tspa_dic, include_costs=True)
+    # print(min_cost)
+    # print(max_cost)
+    # print(avg_cost)
+    # print(nearest_points)
     # plot_cycle(nearest_points, tspa_dic)
+    
 
     # cycle greedy solution
     min_cost, max_cost, avg_cost, nn_points = cycle_greedy_iterate(tspa_dic, include_costs=True)
+    print(min_cost)
+    print(max_cost)
+    print(avg_cost)
+    print(nn_points)
     plot_cycle(nn_points, tspa_dic)
