@@ -78,7 +78,7 @@ def nearest_neighbor_iterate(data, include_costs=True):
         all_distances_with_costs = all_distances + all_costs_arr
     else:
         all_distances_with_costs = all_distances
-    for i in range(1):  #TODO
+    for i in range(len(data)):
         total_cost, chosen_nodes = nearest_neighbor(i, data, copy.deepcopy(all_distances_with_costs), costs_included=include_costs)
         total_cost += all_distances[i, chosen_nodes[-1]]
 
@@ -95,32 +95,35 @@ def nearest_neighbor_iterate(data, include_costs=True):
     return min_cost, max_cost, avg_cost, min_cost_nodes
 
 
-def cycle_greedy(first_node, nearest_node, data, all_distances_with_costs):
+def cycle_greedy(first_node, nearest_node, data, all_distances, include_costs):
     cost = 0
     cost += data[first_node]['cost']
     cost += data[nearest_node]['cost']
-    cost += 2 * all_distances_with_costs[first_node, nearest_node]
+    cost += 2 * all_distances[first_node, nearest_node]
     cycle = [first_node, nearest_node]
     chosen_nodes = {first_node, nearest_node}
     for _ in range(100-2):
-        min_insertion_dist = np.inf
+        min_insertion_cost = np.inf
         min_insert_id = None
         min_new_node = None
         node_candidates = set(range(200)) - chosen_nodes
         for edge_id, edge in enumerate(zip(cycle[:-1], cycle[1:])):
             i, j = edge
             for new_node in node_candidates:
-                edge0dist = all_distances_with_costs[i, new_node]
-                edge1dist = all_distances_with_costs[j, new_node]
-                insertion_dist = edge0dist + edge1dist - all_distances_with_costs[i, j]
-                if insertion_dist < min_insertion_dist:
-                    min_insertion_dist = insertion_dist
+                edge0dist = all_distances[i, new_node]
+                edge1dist = all_distances[j, new_node]
+                insertion_cost = edge0dist + edge1dist - all_distances[i, j]
+                if include_costs:
+                    insertion_cost += data[new_node]['cost']
+                if insertion_cost < min_insertion_cost:
+                    min_insertion_cost = insertion_cost
                     min_insert_id = edge_id + 1
                     min_new_node = new_node
         chosen_nodes.add(min_new_node)
         cycle.insert(min_insert_id, min_new_node)
-        cost += min_insertion_dist
-        cost += data[min_new_node]['cost']
+        cost += min_insertion_cost
+        if not include_costs:
+            cost += data[min_new_node]['cost']
     return cost, cycle
 
 
@@ -133,17 +136,17 @@ def cycle_greedy_iterate(data, include_costs=True):
     min_cost_nodes = []
     all_costs = []
     all_distances = calculate_all_distances(data)
-    all_costs_arr = np.array([data[i]['cost'] for i in data])  # TODO add it
+    all_costs_arr = np.array([data[i]['cost'] for i in data])
     if include_costs:
         all_distances_with_costs = all_distances + all_costs_arr
     else:
         all_distances_with_costs = all_distances
     min_costs = calculate_min_costs(all_distances_with_costs)
-    for i in range(len(data)):#range(10):  # TODO should be len(data)
+    for i in range(len(data)):
         dat = copy.deepcopy(data)
         first_node = i
         nearest_node = min_costs[i][0]
-        cost, cycle = cycle_greedy(first_node=first_node, nearest_node=nearest_node, data=dat, all_distances_with_costs=all_distances_with_costs)
+        cost, cycle = cycle_greedy(first_node=first_node, nearest_node=nearest_node, data=dat, all_distances=all_distances, include_costs=include_costs)
         all_costs.append(cost)
         if cost < min_cost:
             min_cost = cost
